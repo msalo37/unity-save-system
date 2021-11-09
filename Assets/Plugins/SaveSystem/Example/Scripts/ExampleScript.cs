@@ -17,9 +17,23 @@ public class ExampleScript : MonoBehaviour
             inputField.text = data;
     }
 
-    public void Save()
+    private void Start()
+    {
+        SaveController.onSaving += SaveText;
+    }
+
+    private void OnDestroy()
+    {
+        SaveController.onSaving -= SaveText;
+    }
+
+    private void SaveText()
     {
         SaveController.SetSave("inputText" ,inputField.text);
+    }
+
+    public void Save()
+    {
         SaveController.SaveAll();
     }
 

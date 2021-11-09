@@ -104,6 +104,7 @@ namespace msloo.SaveSystem
             try
             {
                 _saves = (Dictionary<string, Save>) bf.Deserialize(file);
+                onSavesLoaded?.Invoke();
             }
             catch (Exception e)
             {

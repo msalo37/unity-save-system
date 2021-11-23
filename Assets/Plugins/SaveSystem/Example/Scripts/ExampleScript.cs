@@ -5,13 +5,14 @@ using UnityEngine.UI;
 public class ExampleScript : MonoBehaviour
 {
     [SerializeField] private InputField inputField;
-
+    private const string saveKey = "myClass";
+    
     private void Awake()
     {
         SaveController.Init();
 
-        if (SaveController.TryToGetSave("inputText", out string data))
-            inputField.text = data;
+        if (SaveController.TryToGetSave(saveKey, out MyClass data))
+            inputField.text = data.Key;
     }
 
     private void Start()
@@ -26,7 +27,7 @@ public class ExampleScript : MonoBehaviour
 
     private void SaveText()
     {
-        SaveController.SetSave("inputText" ,inputField.text);
+        SaveController.SetSave(saveKey ,new MyClass(inputField.text));
     }
 
     public void Save()
@@ -36,7 +37,7 @@ public class ExampleScript : MonoBehaviour
 
     public void Load()
     {
-        inputField.text = SaveController.GetSave<string>("inputText");
+        inputField.text = SaveController.GetSave<MyClass>(saveKey).Key;
     }
 
     public void DeleteSaves()

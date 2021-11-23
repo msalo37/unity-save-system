@@ -10,6 +10,8 @@ namespace msloo.SaveSystem
 {
     public class SaveController : MonoBehaviour
     {
+        #region Signleton
+
         private static SaveController _instance;
 
         private static SaveController Instance
@@ -31,15 +33,25 @@ namespace msloo.SaveSystem
             DontDestroyOnLoad(obj);
         }
 
-        private Dictionary<string, Save> _saves = new Dictionary<string, Save>();
-        private SaveSettings _settings;
+        #endregion
 
+        private SaveSettings _settings;
+        private SavesSerializer _serializer;
+        
         public static event Action onSaving;
-        public static event Action onSavesLoaded;
 
         private void Awake()
         {
+            if (_instance == null)
+                _instance = this;
+            else if (_instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
             _settings = Resources.Load<SaveSettings>("SaveSettings");
+            _serializer = new SavesSerializer(_settings);
             
             if (_settings.autoSaveInterval != 0)
                 StartCoroutine(AutoSave(_settings.autoSaveInterval));
@@ -50,101 +62,53 @@ namespace msloo.SaveSystem
             while (true)
             {
                 yield return new WaitForSeconds(sec);
-                _SaveAll();
+                _serializer.Save();
             }
         }
         
         private void OnApplicationPause(bool pauseStatus)
         {
+            if (pauseStatus == false) return; // status == false means that game opened
             if (_settings.saveOnApplicationPause == false) return;
-            if (pauseStatus == false) return; // status == false means that game not hidden
-            _SaveAll();
+            _serializer.Save();
         }
 
         private void OnApplicationQuit()
         {
             if (_settings.saveOnApplicationQuit == false) return;
-            _SaveAll();
+            _serializer.Save();
         }
 
-        private T _LoadSave<T>(string key)
-        {
-            if (_saves.ContainsKey(key))
-                try
-                {
-                    return _saves[key].GetSavedObject<T>();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e.Message);
-                }
-
-            return default(T);
-        }
-
-        private void _SaveAll()
-        {
-            onSaving?.Invoke();
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = new FileStream(_settings.GetPath(), FileMode.OpenOrCreate);
-            bf.Serialize(file, _saves);
-            file.Close();
-        }
-
-        private void _LoadAll()
-        {
-            if (File.Exists(_settings.GetPath()) == false)
-                return;
-            
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = new FileStream(_settings.GetPath(), FileMode.Open);
-
-            try
-            {
-                _saves = (Dictionary<string, Save>) bf.Deserialize(file);
-                onSavesLoaded?.Invoke();
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Saves file is not saves!\nError: {e.Message}");
-            }
-        }
-
-        private void _DeleteAllSaves()
-        {
-            File.Delete(_settings.GetPath());
-            _saves = new Dictionary<string, Save>();
-        }
-        
         public static void SaveAll()
         {
-            Instance._SaveAll();
+            Instance._serializer.Save();
         }
 
-        public static void SetSave<T>(string key, T data)
+        public static void SetSave<T>(string key, T data) where T : class
         {
-            Instance._saves[key] = new Save(key, data);
+            Instance._serializer.SetSave(key, data);
         }
 
-        public static bool TryToGetSave<T>(string key, out T data)
+        public static bool TryToGetSave<T>(string key, out T data) where T : class
         {
             data = GetSave<T>(key);
-            return Equals(data, default(T)) == false; // check if save is null
+            return data != null;
         }
 
-        public static T GetSave<T>(string key)
+        public static T GetSave<T>(string key) where T : class
         {
-            return Instance._LoadSave<T>(key);
+            return Instance._serializer.GetSave<T>(key);
         }
 
         public static void Init()
-        {
-            Instance._LoadAll();
+        { 
+            if (_instance == null)
+                CreateInstance();
         }
 
         public static void DeleteAllSaves()
         {
-            Instance._DeleteAllSaves();
+            Instance._serializer.RemoveSaves();
         }
     }
 }

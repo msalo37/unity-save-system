@@ -1,8 +1,5 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using msloo.SaveSystem.Settings;
 using UnityEngine;
 
@@ -62,6 +59,7 @@ namespace msloo.SaveSystem
             while (true)
             {
                 yield return new WaitForSeconds(sec);
+                onSaving?.Invoke();
                 _serializer.Save();
             }
         }
@@ -81,6 +79,7 @@ namespace msloo.SaveSystem
 
         public static void SaveAll()
         {
+            onSaving?.Invoke();
             Instance._serializer.Save();
         }
 

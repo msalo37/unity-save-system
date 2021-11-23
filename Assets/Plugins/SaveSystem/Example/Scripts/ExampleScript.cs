@@ -37,7 +37,10 @@ public class ExampleScript : MonoBehaviour
 
     public void Load()
     {
-        inputField.text = SaveController.GetSave<MyClass>(saveKey).Key;
+        if (SaveController.TryToGetSave(saveKey, out MyClass data))
+            inputField.text = data.Key;
+        else
+            inputField.text = "There is no saved data!";
     }
 
     public void DeleteSaves()

@@ -9,10 +9,8 @@ public class ExampleScript : MonoBehaviour
     
     private void Awake()
     {
-        SaveController.Init();
-
-        if (SaveController.TryToGetSave(saveKey, out MyClass data))
-            inputField.text = data.Key;
+        if (SaveController.TryToGetSave(saveKey, out string data))
+            inputField.text = data;
     }
 
     private void Start()
@@ -27,7 +25,7 @@ public class ExampleScript : MonoBehaviour
 
     private void SaveText()
     {
-        SaveController.SetSave(saveKey ,new MyClass(inputField.text));
+        SaveController.SetSave(saveKey ,inputField.text);
     }
 
     public void Save()
@@ -37,8 +35,8 @@ public class ExampleScript : MonoBehaviour
 
     public void Load()
     {
-        if (SaveController.TryToGetSave(saveKey, out MyClass data))
-            inputField.text = data.Key;
+        if (SaveController.TryToGetSave(saveKey, out string data))
+            inputField.text = data;
         else
             inputField.text = "There is no saved data!";
     }

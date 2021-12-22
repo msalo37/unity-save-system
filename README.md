@@ -4,7 +4,11 @@ Save system for unity which i use in my projects. It stores all saves in the dic
 You can check the operation of the saving system using the example scene.
 ### How to use
 
-First you need to create scriptable object "*SaveSettings*" in Resources folder
+First you need to create scriptable object **SaveSettings** in Resources folder
+
+Create Object and assing script **SaveController**.
+
+Then you need to add **IDataHolder** and **IDataLoader** components to object. You can add **JSONDataLoader** or **BinaryDataLoader** and **DictionaryDataHolder** or you can write your own script ;)
 
 To set your class to saves you need:
 ```c#
@@ -30,7 +34,4 @@ To save your game you just need type:
 SaveController.SaveAll();
 ```
 
-Loading saves happens on any interaction with the SaveController, but if you need to initialize it but not use it, you can use:
-```c#
-SaveController.Init();
-```
+If you have errors when you trying access to SaveController you need to change script execution order and set SaveController to call earlier

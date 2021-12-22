@@ -9,16 +9,11 @@ namespace msloo.SaveSystem
         {
             this.key = key;
             this.savedObject = savedObject;
-            this.date = DateTime.Now;
+            this.lastTimeSaved = DateTime.Now;
         }
 
         public readonly string key;
-        private object savedObject;
-        private DateTime date;
-
-        public T GetSavedObject<T>()
-        {
-            return (T)savedObject;
-        }
+        public object savedObject;
+        public DateTime lastTimeSaved;
     }
 }
